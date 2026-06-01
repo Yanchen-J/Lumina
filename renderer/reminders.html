@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>便签 & 纪念日</title>
+  <link rel="stylesheet" href="reminders.css">
+</head>
+<body>
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="todo">📝 待办</button>
+    <button class="tab-btn" data-tab="anniv">🎂 纪念日</button>
+  </div>
+
+  <!-- 待办 tab -->
+  <section class="tab-pane active" id="tab-todo">
+    <div class="add-form">
+      <input id="todo-title" type="text" placeholder="想做的事..." maxlength="200">
+      <div class="row">
+        <label>
+          <span>时间（可选）</span>
+          <input id="todo-due" type="datetime-local">
+        </label>
+        <label>
+          <span>提前提醒（分钟，可选）</span>
+          <input id="todo-remind" type="number" min="0" max="1440" step="5" placeholder="10">
+        </label>
+        <button id="todo-add-btn" class="btn-primary">添加</button>
+      </div>
+    </div>
+
+    <div class="list-section">
+      <h4>未完成 <span id="todo-count" class="muted"></span></h4>
+      <ul id="todo-list-active" class="todo-list"></ul>
+
+      <h4 class="completed-h">已完成</h4>
+      <ul id="todo-list-done" class="todo-list done-list"></ul>
+    </div>
+  </section>
+
+  <!-- 纪念日 tab -->
+  <section class="tab-pane" id="tab-anniv">
+    <div class="add-form">
+      <input id="anniv-title" type="text" placeholder="纪念日名称（生日 / 周年 / 其他...）" maxlength="100">
+      <div class="row">
+        <label>
+          <span>类型</span>
+          <select id="anniv-type">
+            <option>生日</option>
+            <option>纪念日</option>
+            <option>节日</option>
+            <option>其他</option>
+          </select>
+        </label>
+        <label>
+          <span>月</span>
+          <input id="anniv-month" type="number" min="1" max="12" step="1" placeholder="MM">
+        </label>
+        <label>
+          <span>日</span>
+          <input id="anniv-day" type="number" min="1" max="31" step="1" placeholder="DD">
+        </label>
+        <label>
+          <span>年（可选）</span>
+          <input id="anniv-year" type="number" min="1900" max="2100" step="1" placeholder="YYYY">
+        </label>
+      </div>
+      <div class="row">
+        <label class="wide">
+          <span>提前几天提醒（多选，逗号分隔，例 7,3,1）</span>
+          <input id="anniv-remind-before" type="text" placeholder="7,3,1">
+        </label>
+        <button id="anniv-add-btn" class="btn-primary">添加</button>
+      </div>
+      <label class="wide">
+        <span>备注（可选）</span>
+        <input id="anniv-notes" type="text" maxlength="500" placeholder="想让桌宠记住的小细节...">
+      </label>
+    </div>
+
+    <div class="list-section">
+      <h4>所有纪念日 <span id="anniv-count" class="muted"></span></h4>
+      <ul id="anniv-list" class="anniv-list"></ul>
+    </div>
+  </section>
+
+  <script src="reminders.js"></script>
+</body>
+</html>

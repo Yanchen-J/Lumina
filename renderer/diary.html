@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>桌宠日记</title>
+  <link rel="stylesheet" href="diary.css">
+</head>
+<body>
+  <div class="layout">
+    <aside class="cal-pane">
+      <div class="cal-header">
+        <button id="prev-month" class="nav-btn">◀</button>
+        <div id="month-label" class="month-label">2026 年 5 月</div>
+        <button id="next-month" class="nav-btn">▶</button>
+      </div>
+      <div class="cal-weekdays">
+        <div>日</div><div>一</div><div>二</div><div>三</div><div>四</div><div>五</div><div>六</div>
+      </div>
+      <div id="cal-grid" class="cal-grid"></div>
+      <div class="cal-footer">
+        <button id="today-btn" class="nav-btn">今天</button>
+        <span id="stats-info" class="stats-info"></span>
+      </div>
+      <div class="cal-legend" id="cal-legend">
+        <span class="legend-item"><span class="legend-dot user"></span>我</span>
+      </div>
+    </aside>
+
+    <main class="detail-pane">
+      <canvas id="ghost-canvas" class="ghost-canvas"></canvas>
+
+      <div id="detail-empty" class="detail-empty">
+        点左侧日历的日期查看那天的日记~
+      </div>
+
+      <div id="detail" class="detail hidden">
+        <div class="detail-date-head" id="detail-date-head"></div>
+
+        <!-- 桌宠日记部分（标签由 JS 填充角色名） -->
+        <article id="pet-section" class="entry-section hidden">
+          <header class="entry-header">
+            <span class="entry-tag pet-tag" id="pet-tag"></span>
+            <span class="entry-emoji" id="pet-emoji"></span>
+            <span class="entry-mood" id="pet-mood"></span>
+            <span class="entry-meta" id="pet-meta"></span>
+          </header>
+          <div class="entry-body" id="pet-body"></div>
+        </article>
+
+        <!-- 用户日记部分 -->
+        <article id="user-section" class="entry-section">
+          <header class="entry-header user-header">
+            <span class="entry-tag user-tag">我的日记</span>
+            <span class="entry-emoji" id="user-emoji-display"></span>
+            <span class="entry-mood" id="user-mood-display"></span>
+            <span class="entry-meta" id="user-meta"></span>
+            <button id="user-edit-btn" class="mini-btn">✎ 编辑</button>
+            <button id="user-delete-btn" class="mini-btn danger hidden">删除</button>
+          </header>
+          <div id="user-display" class="entry-body"></div>
+          <div id="user-empty" class="user-empty">还没写自己的日记，点 ✎ 编辑 开始记录~</div>
+
+          <div id="user-editor" class="user-editor hidden">
+            <textarea id="user-body" placeholder="今天发生了什么呢...&#10;你可以写下任何想说的话，作为只属于自己的日记。" maxlength="5000"></textarea>
+            <div class="editor-row">
+              <label>心情:</label>
+              <input id="user-mood-input" type="text" placeholder="例: 开心、忙碌" maxlength="8">
+            </div>
+            <div class="editor-row">
+              <label>表情:</label>
+              <div id="emoji-picker" class="emoji-picker"></div>
+            </div>
+            <div class="editor-actions">
+              <button id="user-cancel-btn" class="btn-secondary">取消</button>
+              <button id="user-save-btn" class="btn-primary">保存</button>
+            </div>
+          </div>
+        </article>
+      </div>
+    </main>
+  </div>
+
+  <!-- Live2D 运行时（用于在日记右侧渲染半透明角色背景） -->
+  <script src="../lib/live2dcubismcore.min.js"></script>
+  <script src="../lib/live2d.min.js"></script>
+  <script src="../lib/pixi.min.js"></script>
+  <script src="../lib/index.min.js"></script>
+
+  <script src="diary.js"></script>
+</body>
+</html>

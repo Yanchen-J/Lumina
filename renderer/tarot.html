@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>🔮 今日塔罗</title>
+  <link rel="stylesheet" href="tarot.css">
+</head>
+<body>
+  <div class="container">
+    <header class="head">
+      <h2>🔮 今日塔罗</h2>
+      <div class="date" id="date"></div>
+    </header>
+
+    <!-- 抽牌前 -->
+    <div id="pre-draw" class="pre-draw">
+      <div class="card-back" id="card-back">
+        <div class="back-pattern">✦</div>
+      </div>
+      <p class="hint">点击牌背开始今日抽取</p>
+      <button id="draw-btn" class="btn-primary">抽一张</button>
+    </div>
+
+    <!-- 抽牌后 -->
+    <div id="result" class="result hidden">
+      <div class="card-frame" id="card-frame">
+        <img id="card-img" alt="">
+      </div>
+      <div class="card-meta">
+        <div class="card-name" id="card-name"></div>
+        <div class="card-orientation" id="card-orientation"></div>
+        <div class="card-keywords" id="card-keywords"></div>
+      </div>
+
+      <article class="reading">
+        <div class="reading-row" id="row-intro">
+          <div class="reading-tag">开场</div>
+          <div class="reading-text" id="text-intro"></div>
+        </div>
+        <div class="reading-row" id="row-meaning">
+          <div class="reading-tag">含义</div>
+          <div class="reading-text" id="text-meaning"></div>
+        </div>
+        <div class="reading-row" id="row-advice">
+          <div class="reading-tag">建议</div>
+          <div class="reading-text" id="text-advice"></div>
+        </div>
+        <div class="meta-line" id="meta-line"></div>
+      </article>
+
+      <div class="actions">
+        <button id="redraw-btn" class="btn-secondary">🔄 重新抽（覆盖今日）</button>
+      </div>
+    </div>
+
+    <div id="status" class="status"></div>
+  </div>
+
+  <script src="tarot.js"></script>
+</body>
+</html>

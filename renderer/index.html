@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>Live2D Pet</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div id="status">加载中...</div>
+
+  <!-- 头顶气泡 -->
+  <div id="speech-bubble" class="hidden"><div id="speech-text"></div></div>
+
+  <!-- Live2D 画布 -->
+  <canvas id="live2d-canvas"></canvas>
+
+  <!-- 聊天面板 -->
+  <div id="chat-panel" class="hidden">
+    <div id="chat-header">
+      <span id="chat-title">和我聊天</span>
+      <button id="chat-close" title="关闭">×</button>
+    </div>
+    <div id="chat-messages"></div>
+    <div id="chat-input-row">
+      <input id="chat-input" type="text" placeholder="说点什么..." maxlength="300" autocomplete="off">
+      <button id="chat-send">发送</button>
+    </div>
+  </div>
+
+  <!-- 右键菜单（动态渲染） -->
+  <div id="ctx-menu" class="hidden"></div>
+
+  <!-- 1) Cubism Core 必须最先加载 (定义全局 Live2DCubismCore) -->
+  <script src="../lib/live2dcubismcore.min.js"></script>
+  <!-- 2) Cubism 2 runtime (老模型如 Umaru 用) -->
+  <script src="../lib/live2d.min.js"></script>
+  <!-- 3) PixiJS v6 -->
+  <script src="../lib/pixi.min.js"></script>
+  <!-- 4) pixi-live2d-display (UMD, 同时支持 Cubism 2/4) -->
+  <script src="../lib/index.min.js"></script>
+
+  <script src="app.js"></script>
+</body>
+</html>

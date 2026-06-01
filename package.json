@@ -1,0 +1,76 @@
+{
+  "name": "desktop-pet-live2d",
+  "productName": "DesktopPetLive2D",
+  "version": "1.0.0",
+  "description": "Live2D 桌面宠物 (Electron + PixiJS + pixi-live2d-display)",
+  "main": "main.js",
+  "author": "Chi-Yue-Shan",
+  "scripts": {
+    "setup": "node scripts/setup-resources.js",
+    "setup:lib": "node scripts/setup-resources.js --only=lib",
+    "setup:hiyori": "node scripts/setup-resources.js --only=hiyori",
+    "setup:tarot": "node scripts/setup-resources.js --only=tarot",
+    "start": "electron .",
+    "pack": "electron-builder --dir",
+    "dist": "electron-builder --dir --win --x64",
+    "dist:nsis": "electron-builder --win nsis --x64",
+    "dist:portable": "electron-builder --win portable --x64"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^31.7.7",
+    "electron-builder": "^24.13.3"
+  },
+  "dependencies": {
+    "active-win": "^8.2.1"
+  },
+  "build": {
+    "appId": "com.desktoppet.live2d",
+    "productName": "DesktopPetLive2D",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "main/**/*",
+      "renderer/**/*",
+      "lib/**/*",
+      "models/**/*",
+      "assets/**/*",
+      "package.json",
+      "!**/*.md",
+      "!**/.git*",
+      "!**/{.DS_Store,Thumbs.db}",
+      "!**/*.{log,tmp}",
+      "!scripts/**/*",
+      "!build/**/*",
+      "!dist/**/*"
+    ],
+    "asar": true,
+    "asarUnpack": [
+      "lib/**/*",
+      "models/**/*",
+      "assets/**/*"
+    ],
+    "win": {
+      "target": [
+        { "target": "dir", "arch": ["x64"] }
+      ],
+      "artifactName": "${productName}-${version}-${arch}.${ext}",
+      "signAndEditExecutable": false
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "perMachine": false,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Desktop Pet Live2D",
+      "include": "build/installer.nsh"
+    },
+    "portable": {
+      "artifactName": "${productName}-${version}-portable.${ext}"
+    }
+  }
+}

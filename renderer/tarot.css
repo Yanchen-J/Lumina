@@ -1,0 +1,164 @@
+* { box-sizing: border-box; }
+html, body {
+  margin: 0;
+  padding: 0;
+  background: linear-gradient(135deg, #2c1f4a 0%, #4a2f6f 50%, #2c1f4a 100%);
+  font-family: "Microsoft YaHei", "Segoe UI", sans-serif;
+  color: #f0e6ff;
+  min-height: 100vh;
+}
+.container {
+  padding: 24px;
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+.head { text-align: center; margin-bottom: 16px; }
+.head h2 {
+  margin: 0;
+  font-size: 22px;
+  color: #ffd6f5;
+  text-shadow: 0 0 14px rgba(255, 200, 240, 0.5);
+}
+.date { font-size: 12px; color: #b9a8d8; margin-top: 4px; }
+
+/* 抽牌前 */
+.pre-draw { text-align: center; padding: 30px 0; }
+.card-back {
+  width: 180px;
+  height: 280px;
+  margin: 0 auto 18px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #6b3fa0, #9b6dd6);
+  border: 3px solid #d4b9ff;
+  box-shadow: 0 0 30px rgba(180, 130, 240, 0.4), inset 0 0 20px rgba(255, 255, 255, 0.1);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+.card-back:hover {
+  transform: translateY(-5px) scale(1.03);
+  box-shadow: 0 5px 40px rgba(220, 170, 255, 0.6), inset 0 0 30px rgba(255, 255, 255, 0.2);
+}
+.back-pattern {
+  font-size: 70px;
+  color: #ffd6f5;
+  text-shadow: 0 0 20px rgba(255, 220, 250, 0.8);
+}
+.hint {
+  font-size: 13px;
+  color: #c5b3e8;
+  margin: 12px 0;
+}
+
+/* 抽牌后 */
+.result.hidden { display: none; }
+
+.card-frame {
+  width: 220px;
+  margin: 0 auto 16px;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 0 30px rgba(220, 170, 255, 0.4);
+  animation: flip-in 0.6s ease-out;
+}
+.card-frame img {
+  width: 100%;
+  display: block;
+}
+.card-frame.reversed img { transform: rotate(180deg); }
+
+@keyframes flip-in {
+  0%   { transform: rotateY(180deg) scale(0.7); opacity: 0; }
+  60%  { transform: rotateY(20deg) scale(1.05); opacity: 1; }
+  100% { transform: rotateY(0) scale(1); }
+}
+
+.card-meta { text-align: center; margin-bottom: 18px; }
+.card-name {
+  font-size: 18px;
+  font-weight: bold;
+  color: #ffd6f5;
+}
+.card-orientation {
+  font-size: 12px;
+  color: #b9a8d8;
+  margin-top: 3px;
+}
+.card-keywords {
+  font-size: 11px;
+  color: #c5b3e8;
+  margin-top: 6px;
+}
+
+/* 解读卡 */
+.reading {
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(8px);
+  border-radius: 14px;
+  padding: 14px 16px;
+  border: 1px solid rgba(220, 180, 255, 0.2);
+}
+.reading-row {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 10px;
+  align-items: flex-start;
+}
+.reading-row:last-of-type { margin-bottom: 0; }
+.reading-tag {
+  font-size: 11px;
+  background: rgba(220, 170, 255, 0.25);
+  color: #ffd6f5;
+  padding: 2px 8px;
+  border-radius: 6px;
+  flex-shrink: 0;
+  font-weight: bold;
+}
+.reading-text {
+  font-size: 13px;
+  line-height: 1.7;
+  color: #f0e6ff;
+}
+.reading-row.empty { display: none; }
+
+.meta-line {
+  font-size: 10px;
+  color: #8d7ab8;
+  text-align: right;
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px dashed rgba(220, 180, 255, 0.15);
+}
+
+/* 操作按钮 */
+.actions { text-align: center; margin-top: 16px; }
+.btn-primary, .btn-secondary {
+  padding: 9px 22px;
+  font-size: 13px;
+  border-radius: 22px;
+  border: none;
+  cursor: pointer;
+  font-weight: bold;
+}
+.btn-primary {
+  background: linear-gradient(135deg, #b48cf7, #d4b1ff);
+  color: #2c1f4a;
+  box-shadow: 0 0 18px rgba(180, 140, 247, 0.5);
+}
+.btn-primary:hover { filter: brightness(1.1); }
+.btn-secondary {
+  background: rgba(255, 255, 255, 0.1);
+  color: #d4b9ff;
+  border: 1px solid rgba(220, 180, 255, 0.3);
+}
+.btn-secondary:hover { background: rgba(255, 255, 255, 0.18); }
+
+.status {
+  text-align: center;
+  font-size: 12px;
+  color: #c5b3e8;
+  margin-top: 12px;
+  min-height: 18px;
+}
+.status.error { color: #ffaaaa; }

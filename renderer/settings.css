@@ -1,0 +1,235 @@
+* { box-sizing: border-box; }
+html, body {
+  margin: 0;
+  padding: 0;
+  background: linear-gradient(135deg, #fff5fa, #ffeaf3);
+  font-family: "Microsoft YaHei", "Segoe UI", sans-serif;
+  color: #4a3060;
+}
+.container {
+  padding: 20px 24px 80px;     /* 给底部保存条留空间 */
+  max-width: 520px;
+}
+.auto-save-hint {
+  margin: -8px 0 12px;
+  font-size: 11px;
+  color: #b04080;
+  font-style: italic;
+}
+.save-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(6px);
+  border-top: 1px solid #ffd1e8;
+  padding: 10px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  z-index: 50;
+}
+.save-bar .result {
+  flex: 1;
+  font-size: 12px;
+  color: #4a8060;
+  text-align: left;
+}
+.save-bar .result.error { color: #b04060; }
+h2 {
+  margin: 0 0 16px;
+  font-size: 18px;
+  color: #c97099;
+}
+h3 {
+  margin: 16px 0 8px;
+  font-size: 14px;
+  color: #b04080;
+  border-bottom: 1px solid #ffd1e8;
+  padding-bottom: 4px;
+}
+section { margin-bottom: 14px; }
+.hint {
+  color: #886878;
+  font-size: 12px;
+  margin: 4px 0;
+  line-height: 1.5;
+}
+.hint code {
+  background: #ffe6f1;
+  padding: 1px 5px;
+  border-radius: 3px;
+}
+.toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 0;
+  cursor: pointer;
+  font-size: 14px;
+}
+.toggle input { width: 16px; height: 16px; cursor: pointer; }
+.field {
+  margin: 10px 0;
+}
+.field label {
+  display: block;
+  font-size: 12px;
+  color: #6a4a5a;
+  margin-bottom: 4px;
+}
+.field input,
+.field select {
+  width: 100%;
+  padding: 7px 10px;
+  border: 1.5px solid #ffc0d8;
+  border-radius: 8px;
+  font-size: 13px;
+  background: white;
+  color: #4a3060;
+  outline: none;
+}
+.field input:focus,
+.field select:focus { border-color: #ff5d9a; }
+.row {
+  display: flex;
+  gap: 10px;
+}
+.row .half { flex: 1; }
+
+.actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 12px;
+}
+button {
+  padding: 7px 16px;
+  font-size: 13px;
+  border-radius: 8px;
+  cursor: pointer;
+  border: none;
+  font-weight: bold;
+}
+.btn-primary {
+  background: linear-gradient(135deg, #ff5d9a, #ff8fc6);
+  color: white;
+}
+.btn-primary:hover { filter: brightness(1.05); }
+.btn-secondary {
+  background: white;
+  color: #c97099;
+  border: 1.5px solid #ffc0d8;
+}
+.btn-secondary:hover { background: #fff0f6; }
+
+.result {
+  margin-top: 8px;
+  font-size: 12px;
+  min-height: 18px;
+  text-align: right;
+  color: #4a8060;
+}
+
+.footer-info { margin-top: 18px; }
+
+.mem-list {
+  margin-top: 10px;
+  max-height: 160px;
+  overflow-y: auto;
+  font-size: 12px;
+  color: #5a3848;
+  background: white;
+  border: 1px solid #ffd1e8;
+  border-radius: 8px;
+  padding: 6px 10px;
+  display: none;
+}
+.mem-list.visible { display: block; }
+.mem-list .mem-empty { color: #aa8898; font-style: italic; }
+.mem-list .mem-item {
+  padding: 3px 0;
+  border-bottom: 1px dashed #ffe6f1;
+  line-height: 1.4;
+}
+.mem-list .mem-item:last-child { border-bottom: none; }
+
+/* 角色性格编辑卡片 */
+.char-card {
+  background: white;
+  border: 1.5px solid #ffc0d8;
+  border-radius: 10px;
+  padding: 12px 14px;
+  margin-bottom: 10px;
+}
+.char-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+.char-name {
+  font-size: 14px;
+  font-weight: bold;
+  color: #c97099;
+}
+.char-id {
+  font-size: 11px;
+  color: #aa6688;
+  margin-left: 6px;
+}
+.char-card .field {
+  margin: 8px 0 4px;
+}
+.char-card .field label {
+  font-size: 11px;
+  color: #6a4a99;
+}
+.char-card textarea,
+.char-card input[type="text"] {
+  width: 100%;
+  padding: 7px 10px;
+  border: 1.5px solid #ffe0ed;
+  border-radius: 8px;
+  font-size: 12px;
+  font-family: inherit;
+  color: #4a3060;
+  background: #fffafd;
+  outline: none;
+  resize: vertical;
+  line-height: 1.5;
+}
+.char-card textarea:focus,
+.char-card input:focus {
+  border-color: #ff8fc6;
+  background: white;
+}
+.char-card textarea {
+  min-height: 100px;
+}
+.char-card .row-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 6px;
+  margin-top: 6px;
+}
+.char-card button {
+  padding: 4px 10px;
+  font-size: 11px;
+  border-radius: 6px;
+  border: 1px solid #ffc0d8;
+  background: white;
+  color: #c97099;
+  cursor: pointer;
+}
+.char-card button:hover { background: #fff0f6; }
+.char-card .save-status {
+  font-size: 11px;
+  color: #4a8060;
+  margin-right: auto;
+}
+.char-card .save-status.error { color: #b04060; }
+.mem-list::-webkit-scrollbar { width: 6px; }
+.mem-list::-webkit-scrollbar-thumb { background: #ffb3d9; border-radius: 3px; }

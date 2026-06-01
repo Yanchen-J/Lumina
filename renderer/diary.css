@@ -1,0 +1,358 @@
+* { box-sizing: border-box; }
+html, body {
+  margin: 0;
+  padding: 0;
+  background: linear-gradient(135deg, #fff5fa, #ffeaf3);
+  font-family: "Microsoft YaHei", "Segoe UI", sans-serif;
+  color: #4a3060;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.layout { display: flex; height: 100%; }
+
+/* 左侧日历 */
+.cal-pane {
+  width: 410px;
+  flex-shrink: 0;
+  padding: 14px;
+  background: rgba(255, 255, 255, 0.5);
+  border-right: 1px solid #ffd1e8;
+  display: flex;
+  flex-direction: column;
+}
+
+.cal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+.month-label {
+  font-size: 15px;
+  font-weight: bold;
+  color: #c97099;
+}
+.nav-btn {
+  background: white;
+  border: 1.5px solid #ffc0d8;
+  border-radius: 8px;
+  padding: 4px 10px;
+  font-size: 12px;
+  cursor: pointer;
+  color: #c97099;
+}
+.nav-btn:hover { background: #fff0f6; }
+
+.cal-weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  text-align: center;
+  font-size: 11px;
+  color: #aa6688;
+  margin-bottom: 4px;
+  font-weight: bold;
+}
+
+.cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+  flex: 1;
+  overflow-y: auto;
+}
+
+.cal-cell {
+  aspect-ratio: 1;
+  background: white;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 4px 2px 2px;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: background 0.15s, border-color 0.15s, transform 0.1s;
+  position: relative;
+  user-select: none;
+  overflow: hidden;
+}
+.cal-cell:hover { background: #fff0f6; }
+.cal-cell.has-any { background: #ffeaf3; }
+.cal-cell.has-any:hover { background: #ffd1e8; }
+.cal-cell.selected { border-color: #ff5d9a; transform: scale(1.05); }
+.cal-cell.today { box-shadow: inset 0 0 0 1.5px #ff8fc6; }
+.cal-cell.outside { opacity: 0.35; }
+.cal-cell.future { cursor: default; }
+.cal-cell.future:hover { background: white; }
+
+.cal-day-num {
+  font-size: 12px;
+  color: #6a4a5a;
+  line-height: 1;
+}
+.cal-cell.has-any .cal-day-num { color: #b04080; font-weight: bold; }
+
+/* emoji 用色环区分作者：粉=桌宠，紫=用户 */
+.cal-emojis {
+  display: flex;
+  gap: 3px;
+  margin-top: auto;
+  margin-bottom: 1px;
+  align-items: flex-end;
+  justify-content: center;
+}
+.cal-emoji-circle {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  line-height: 1;
+  background: white;
+  border: 2px solid transparent;
+}
+/* .cal-emoji-circle.pet 颜色由 JS 按角色 inline style 设置 */
+.cal-emoji-circle.user { border-color: #7a5cff; background: #ebe5ff; }
+.cal-emoji-placeholder {
+  margin-top: auto;
+  margin-bottom: 4px;
+  font-size: 10px;
+  color: #ddd;
+}
+
+.cal-footer {
+  margin-top: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 11px;
+  color: #886878;
+}
+.stats-info { color: #aa6688; }
+
+.cal-legend {
+  margin-top: 6px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+  font-size: 11px;
+  color: #886878;
+}
+.legend-item { display: flex; align-items: center; gap: 4px; }
+.legend-dot {
+  width: 10px; height: 10px; border-radius: 50%;
+  border: 2px solid currentColor;
+}
+.legend-dot.user { color: #7a5cff; background: #ebe5ff; border-color: #7a5cff; }
+
+/* 右侧详情 */
+.detail-pane {
+  flex: 1;
+  padding: 24px 28px;
+  overflow-y: auto;
+  position: relative;
+}
+
+/* 半透明 Live2D 形象，覆盖在详情面板最上层 */
+.ghost-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  opacity: 0.25;
+  transition: opacity 0.4s ease;
+  z-index: 50;
+}
+.ghost-canvas.hidden { opacity: 0; }
+
+.detail-empty {
+  color: #aa6688;
+  font-size: 14px;
+  text-align: center;
+  margin-top: 80px;
+  position: relative;
+  z-index: 1;
+}
+.detail.hidden { display: none; }
+.detail {
+  position: relative;
+  z-index: 1;
+}
+
+.detail-date-head {
+  font-size: 18px;
+  font-weight: bold;
+  color: #c97099;
+  border-bottom: 2px dashed #ffd1e8;
+  padding-bottom: 12px;
+  margin-bottom: 16px;
+}
+
+.entry-section {
+  background: white;
+  border-radius: 12px;
+  padding: 14px 18px;
+  margin-bottom: 16px;
+  border-left: 4px solid #ff8fc6;
+}
+.entry-section.hidden { display: none; }
+/* #pet-section border-left 由 JS 按角色色 inline style 设置 */
+#user-section { border-left-color: #7a5cff; }
+
+.entry-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+.entry-tag {
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 8px;
+  color: white;
+  font-weight: bold;
+}
+/* .pet-tag 背景由 JS 按角色色 inline style 设置 */
+.user-tag { background: #7a5cff; }
+.entry-emoji { font-size: 22px; line-height: 1; }
+.entry-mood {
+  font-size: 12px;
+  color: #b04080;
+  background: #ffeaf3;
+  padding: 2px 8px;
+  border-radius: 8px;
+}
+/* user 区的心情徽章用紫色 */
+#user-section .entry-mood { color: #4a3a99; background: #ebe5ff; }
+.entry-meta {
+  font-size: 10px;
+  color: #aa6688;
+  margin-left: auto;
+}
+.entry-body {
+  font-size: 14px;
+  line-height: 1.75;
+  color: #4a3060;
+  white-space: pre-wrap;
+}
+
+.user-empty {
+  color: #aa8898;
+  font-size: 13px;
+  font-style: italic;
+}
+
+/* 用户编辑器 */
+.mini-btn {
+  font-size: 11px;
+  background: white;
+  border: 1px solid #c8b8ff;
+  color: #5a4a99;
+  padding: 3px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.mini-btn:hover { background: #ebe5ff; }
+.mini-btn.danger {
+  border-color: #ffb0b0;
+  color: #b04060;
+}
+.mini-btn.danger:hover { background: #ffe0e0; }
+.mini-btn.hidden { display: none; }
+
+.user-editor { margin-top: 6px; }
+.user-editor.hidden { display: none; }
+
+#user-body {
+  width: 100%;
+  min-height: 200px;
+  padding: 10px 12px;
+  border: 1.5px solid #c8b8ff;
+  border-radius: 10px;
+  font-size: 13px;
+  color: #4a3060;
+  font-family: inherit;
+  resize: vertical;
+  outline: none;
+  background: #fafaff;
+  line-height: 1.6;
+}
+#user-body:focus { border-color: #7a5cff; }
+
+.editor-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 10px;
+}
+.editor-row label {
+  font-size: 12px;
+  color: #6a4a99;
+  width: 36px;
+  flex-shrink: 0;
+}
+#user-mood-input {
+  flex: 1;
+  padding: 5px 10px;
+  border: 1.5px solid #c8b8ff;
+  border-radius: 8px;
+  font-size: 12px;
+  outline: none;
+  background: white;
+}
+#user-mood-input:focus { border-color: #7a5cff; }
+
+.emoji-picker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  flex: 1;
+}
+.emoji-option {
+  font-size: 18px;
+  cursor: pointer;
+  padding: 3px 5px;
+  border-radius: 6px;
+  border: 1.5px solid transparent;
+  line-height: 1;
+  transition: background 0.1s, border-color 0.1s;
+}
+.emoji-option:hover { background: #ebe5ff; }
+.emoji-option.selected { border-color: #7a5cff; background: #ebe5ff; }
+
+.editor-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 12px;
+}
+.btn-primary, .btn-secondary {
+  font-size: 12px;
+  padding: 6px 14px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-weight: bold;
+}
+.btn-primary {
+  background: linear-gradient(135deg, #7a5cff, #b39bff);
+  color: white;
+}
+.btn-primary:hover { filter: brightness(1.08); }
+.btn-secondary {
+  background: white;
+  color: #6a4a99;
+  border: 1.5px solid #c8b8ff;
+}
+.btn-secondary:hover { background: #ebe5ff; }
+
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-thumb { background: #ffb3d9; border-radius: 4px; }
+::-webkit-scrollbar-track { background: transparent; }

@@ -1,0 +1,66 @@
+# Dependencies
+node_modules/
+
+# 构建产物
+dist/
+out/
+build/
+*.exe
+*.zip
+
+# 日志
+*.log
+logs/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# 系统
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# 编辑器
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# 临时文件
+*.tmp
+*.bak
+.cache/
+
+# Electron 缓存
+.electron-cache/
+
+# 用户运行时生成的数据（如果不小心在本地目录里跑过）
+chat_cache.json
+memories/
+diaries/
+collection.json
+todos.json
+anniversaries.json
+settings.json
+
+# ============================================================
+# Live2D 模型文件不进仓库（版权风险）
+# 只放行项目自带的 Hiyori 官方示例
+# 第三方模型用户自己手动放进 models/<name>/
+# ============================================================
+models/*
+!models/.gitkeep
+!models/Hiyori/
+
+# ============================================================
+# 可选：让仓库更小（公开发布前推荐启用）
+# 这些资源都能用 `npm run setup` 一键重新下载
+# 取消下面的注释后，新 clone 项目的用户需要先跑一次 setup
+# ============================================================
+# lib/
+# assets/tarot/images/
+# models/Hiyori/
+
+# package-lock.json 故意保留以锁定依赖版本，不要 ignore
+# yarn.lock / pnpm-lock.yaml 同理

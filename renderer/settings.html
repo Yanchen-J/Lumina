@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>桌宠设置</title>
+  <link rel="stylesheet" href="settings.css">
+</head>
+<body>
+  <div class="container">
+    <h2>桌宠设置</h2>
+    <p class="auto-save-hint">所有改动会自动保存 ✓</p>
+
+    <section>
+      <h3>LLM 对话</h3>
+      <p class="hint">启用后，右键聊天会调用大模型回复；关闭则使用内置台词。</p>
+
+      <label class="toggle">
+        <input type="checkbox" id="llm-enabled">
+        <span>启用 LLM 对话</span>
+      </label>
+
+      <div class="field">
+        <label for="llm-provider">服务商</label>
+        <select id="llm-provider">
+          <option value="ollama">Ollama（本地，无需 Key）</option>
+          <option value="openai-compatible">OpenAI 兼容接口（DeepSeek / Qwen / 智谱 / Moonshot 等）</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="llm-base-url">API 地址</label>
+        <input id="llm-base-url" type="text" placeholder="http://localhost:11434">
+        <small class="hint" id="base-url-hint"></small>
+      </div>
+
+      <div class="field" id="api-key-row">
+        <label for="llm-api-key">API Key</label>
+        <input id="llm-api-key" type="password" placeholder="sk-...">
+      </div>
+
+      <div class="field">
+        <label for="llm-model">模型名</label>
+        <input id="llm-model" type="text" placeholder="qwen2.5:7b / deepseek-chat / gpt-4o-mini">
+      </div>
+
+      <div class="row">
+        <div class="field half">
+          <label for="llm-max-tokens">最大 tokens</label>
+          <input id="llm-max-tokens" type="number" min="20" max="4000" step="10">
+        </div>
+        <div class="field half">
+          <label for="llm-temperature">temperature</label>
+          <input id="llm-temperature" type="number" min="0" max="2" step="0.1">
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="llm-timeout">请求超时（秒）— 所有 LLM 调用共用（聊天/日记/塔罗/记忆）</label>
+        <input id="llm-timeout" type="number" min="10" max="600" step="10">
+      </div>
+
+      <div class="actions">
+        <button id="test-btn" class="btn-secondary">测试连接</button>
+      </div>
+    </section>
+
+    <section>
+      <h3>长期记忆</h3>
+      <p class="hint">两层记忆：<b>共享层</b>跨所有角色（基础信息、人际、长期偏好等），<b>角色层</b>由每个角色 <code>pet.config.json</code> 的 <code>memoryFocus</code> 决定关注什么。一次 LLM 提取同时产出两类，token 成本和单层一致。</p>
+
+      <label class="toggle">
+        <input type="checkbox" id="mem-enabled">
+        <span>启用长期记忆</span>
+      </label>
+
+      <div class="row">
+        <div class="field half">
+          <label for="mem-max">最多记忆条数</label>
+          <input id="mem-max" type="number" min="5" max="200" step="5">
+        </div>
+        <div class="field half">
+          <label for="mem-every">每 N 轮提取一次</label>
+          <input id="mem-every" type="number" min="3" max="30" step="1">
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="field half">
+          <label for="mem-extract-tokens">提取最大 tokens（建议 ≥800）</label>
+          <input id="mem-extract-tokens" type="number" min="200" max="8000" step="100">
+        </div>
+        <div class="field half">
+          <label for="mem-consolidate-tokens">整理最大 tokens（建议 ≥1200）</label>
+          <input id="mem-consolidate-tokens" type="number" min="200" max="8000" step="100">
+        </div>
+      </div>
+
+      <div class="actions">
+        <button id="mem-consolidate-btn" class="btn-secondary">整理记忆</button>
+        <button id="mem-clear-specific-btn" class="btn-secondary">清空当前角色</button>
+        <button id="mem-clear-shared-btn" class="btn-secondary">清空共享</button>
+        <button id="mem-view-btn" class="btn-secondary">查看记忆</button>
+      </div>
+      <div id="mem-list" class="mem-list"></div>
+    </section>
+
+    <section>
+      <h3>桌宠日记</h3>
+      <p class="hint">每天一篇日记，由桌宠用她的视角写。包含心情 emoji，可在日历中翻阅历史。</p>
+
+      <label class="toggle">
+        <input type="checkbox" id="diary-auto">
+        <span>每天自动生成（到点时若未写过）</span>
+      </label>
+
+      <div class="field">
+        <label for="diary-time">自动生成时间</label>
+        <input id="diary-time" type="time">
+      </div>
+
+      <div class="field">
+        <label for="diary-max-tokens">日记最大 tokens（影响篇幅，建议 ≥1000）</label>
+        <input id="diary-max-tokens" type="number" min="200" max="8000" step="100">
+      </div>
+
+      <div class="actions">
+        <button id="diary-open-btn" class="btn-secondary">📔 查看历史日记</button>
+      </div>
+    </section>
+
+    <section>
+      <h3>口袋图鉴</h3>
+      <p class="hint">从长期记忆中提取实体（人物/宠物/食物/地点等），整理成卡片图鉴。每张卡片附带相关对话片段。</p>
+
+      <label class="toggle">
+        <input type="checkbox" id="collection-auto">
+        <span>自动整理（聊天达到轮数后台自动生成）</span>
+      </label>
+
+      <div class="row">
+        <div class="field half">
+          <label for="collection-every">每 N 轮聊天后整理</label>
+          <input id="collection-every" type="number" min="5" max="100" step="5">
+        </div>
+        <div class="field half">
+          <label for="collection-max-tokens">最大 tokens（建议 ≥2000）</label>
+          <input id="collection-max-tokens" type="number" min="500" max="8000" step="100">
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="field half">
+          <label for="collection-min-snippets">每张卡片最少对话片段</label>
+          <input id="collection-min-snippets" type="number" min="0" max="5" step="1">
+        </div>
+        <div class="field half">
+          <label for="collection-max-snippets">每张卡片最多对话片段</label>
+          <input id="collection-max-snippets" type="number" min="1" max="10" step="1">
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h3>语音</h3>
+      <p class="hint">部分角色（如小埋）自带配音，会在动作时随机播放。在角色 <code>pet.config.json</code> 里设 <code>voiceEnabled: true</code> 才会启用。</p>
+      <label class="toggle">
+        <input type="checkbox" id="voice-muted">
+        <span>全局静音（关闭所有角色的语音）</span>
+      </label>
+    </section>
+
+    <section>
+      <h3>角色性格</h3>
+      <p class="hint">每个角色的对话人设（system prompt）。改完自动保存，下次和该角色聊天时立即生效。</p>
+      <p class="hint">高级配置（缩放、窗口尺寸、台词库等）仍在 <code>models/&lt;角色&gt;/pet.config.json</code> 文件里手改。本设置只覆盖 <code>personality</code> 和 <code>memoryFocus</code> 两项。</p>
+      <div id="characters-list"></div>
+    </section>
+
+    <section>
+      <h3>数据管理</h3>
+      <p class="hint">导出 / 重置 <code>%APPDATA%\desktop-pet-live2d\</code> 下的所有用户数据（记忆 / 日记 / 塔罗 / 图鉴 / 待办 / 纪念日 / 设置）。换电脑时先导出再到新机器手动放进 APPDATA。</p>
+      <div class="actions">
+        <button id="data-export-btn" class="btn-secondary">📦 导出全部数据</button>
+        <button id="data-reset-btn" class="btn-secondary" style="color:#b04060;border-color:#ffb0b0">🗑 重置应用</button>
+      </div>
+    </section>
+
+    <section class="footer-info">
+      <h3>关于</h3>
+      <div id="about-info" class="hint">Desktop Pet Live2D v1.0.0 · MIT License<br>
+      <a href="#" id="about-open-folder">打开数据目录</a> · <a href="#" id="about-open-repo">GitHub 仓库</a></div>
+    </section>
+  </div>
+
+  <!-- 底部固定保存条 -->
+  <div class="save-bar">
+    <span id="result" class="result"></span>
+    <button id="save-btn" class="btn-primary">保存</button>
+  </div>
+
+  <script src="settings.js"></script>
+</body>
+</html>

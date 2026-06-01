@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>口袋图鉴</title>
+  <link rel="stylesheet" href="collection.css">
+</head>
+<body>
+  <div class="layout">
+    <aside class="side">
+      <div class="side-header">
+        <h2>📖 图鉴</h2>
+        <p class="hint">基于长期记忆收集到的"重要事物"</p>
+      </div>
+      <div class="cat-list" id="cat-list"></div>
+      <div class="side-footer">
+        <button id="rebuild-btn" class="btn-primary">🔄 整理图鉴</button>
+        <button id="clear-btn" class="btn-secondary">清空</button>
+        <div id="status" class="status"></div>
+      </div>
+    </aside>
+
+    <main class="main">
+      <div id="grid" class="grid"></div>
+      <div id="empty" class="empty hidden">
+        <div class="empty-emoji">📖</div>
+        <h3>图鉴还是空的</h3>
+        <p>开启长期记忆并和桌宠聊一会儿，<br>然后点 🔄 整理图鉴 让她把重要的事物收集进来~</p>
+      </div>
+    </main>
+
+    <aside class="detail-pane hidden" id="detail-pane">
+      <button class="close-btn" id="detail-close">×</button>
+      <div class="detail-header">
+        <div class="detail-emoji" id="d-emoji">✨</div>
+        <div class="detail-title-wrap">
+          <div class="detail-title" id="d-title"></div>
+          <div class="detail-cat" id="d-cat"></div>
+        </div>
+      </div>
+      <div class="detail-section">
+        <div class="detail-desc" id="d-desc"></div>
+      </div>
+      <div class="detail-section">
+        <h4>📝 相关记忆</h4>
+        <ul id="d-facts" class="fact-list"></ul>
+      </div>
+      <div class="detail-section">
+        <h4>💬 对话片段</h4>
+        <div id="d-snippets" class="snippet-list"></div>
+      </div>
+      <div class="detail-meta" id="d-meta"></div>
+      <div class="detail-actions">
+        <button id="d-delete" class="btn-danger">🗑 删除这张卡片</button>
+      </div>
+    </aside>
+  </div>
+
+  <script src="collection.js"></script>
+</body>
+</html>
