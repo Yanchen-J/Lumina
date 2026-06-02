@@ -8,6 +8,9 @@ html, body {
   -webkit-user-select: none;
   width: 100vw;
   height: 100vh;
+  /* 锁死缩放，防止高刷屏 setBounds 触发 Chromium 微调 zoomFactor 时 DOM 漂移 */
+  zoom: 1;
+  touch-action: none;
 }
 
 #live2d-canvas {

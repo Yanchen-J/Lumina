@@ -50,6 +50,17 @@ function createPetWindow() {
 
   petWindow.setMenu(null);
   petWindow.loadFile(path.join('renderer', 'index.html'));
+  // 锁死页面缩放因子。否则在高刷屏 + 高 DPI 缩放下，
+  // setBounds 频繁触发 Chromium 重算 zoomFactor，
+  // DOM 元素（气泡/菜单/聊天框）会跟着抖动 + 漂移 + 累积变大。
+  petWindow.webContents.on('did-finish-load', () => {
+    petWindow.webContents.setZoomFactor(1);
+    petWindow.webContents.setVisualZoomLevelLimits(1, 1);
+  });
+  // 拦截 Ctrl+滚轮 / 触摸板手势缩放，防止用户或系统误触发
+  petWindow.webContents.on('zoom-changed', () => {
+    petWindow.webContents.setZoomFactor(1);
+  });
   // petWindow.webContents.openDevTools({ mode: 'detach' });
 }
 
