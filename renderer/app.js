@@ -142,9 +142,14 @@ async function initLive2D() {
   setupInteractions();
 
   // 启动问候
-  // 首次启动：显示引导气泡而不是常规招呼
+  // 优先级：生日 > 首启引导 > 普通 greet
   // settings.firstRun === true 说明从未见过引导
-  if (currentSettings && currentSettings.firstRun) {
+  const todayBirthday = isCharacterBirthdayToday();
+  if (todayBirthday) {
+    setTimeout(() => {
+      showSpeech(pickBirthdayGreeting(), 9000);
+    }, 800);
+  } else if (currentSettings && currentSettings.firstRun) {
     setTimeout(() => {
       const llmOn = currentSettings.llm && currentSettings.llm.enabled;
       const guide = llmOn
@@ -159,6 +164,28 @@ async function initLive2D() {
   } else {
     setTimeout(() => showSpeech(pickLine('greet'), 3500), 800);
   }
+}
+
+// ========== 生日特别行为 ==========
+// pet.config.json 里的 birthday: "MM-DD"——当天有特殊招呼 + 头顶飘 🎂
+function isCharacterBirthdayToday() {
+  const info = availableModels.find(m => m.id === currentModelId);
+  const bday = info && info.config && info.config.birthday;
+  if (!bday) return false;
+  const m = /^(\d{1,2})-(\d{1,2})$/.exec(String(bday).trim());
+  if (!m) return false;
+  const today = new Date();
+  return today.getMonth() + 1 === parseInt(m[1], 10) && today.getDate() === parseInt(m[2], 10);
+}
+
+function pickBirthdayGreeting() {
+  const info = availableModels.find(m => m.id === currentModelId);
+  const name = (info && info.config.displayName) || '我';
+  // 角色配置里可以定义 birthdayLines 自定义；没定义用通用模板
+  const custom = info && info.config.lines && info.config.lines.birthday;
+  if (Array.isArray(custom) && custom.length) return pickRandom(custom);
+  // 通用 fallback
+  return `嘿嘿，主人~ 今天是 ${name} 的生日哦 (≧▽≦) 🎂`;
 }
 
 async function loadModelById(id) {
@@ -311,6 +338,15 @@ function setupInteractions() {
 
   chatClose.addEventListener('click', closeChat);
   chatSend.addEventListener('click', sendChatMessage);
+  setupSlashCommands();
+  // 历史回溯按钮
+  const historyBtn = document.getElementById('chat-history-btn');
+  if (historyBtn) {
+    historyBtn.addEventListener('click', () => {
+      if (historyMode) exitHistoryMode();
+      else enterHistoryMode();
+    });
+  }
   chatInput.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') sendChatMessage();
   });
@@ -321,8 +357,9 @@ function setupInteractions() {
   });
 }
 
-function tryTapMotion() {
+function tryTapMotion(opts) {
   if (!model) return;
+  const voiceProb = (opts && typeof opts.voiceProb === 'number') ? opts.voiceProb : 1;
   // 70% 几率 tap_body / 30% tap_head（如果该模型有）
   const candidates = [];
   if (currentMotionGroups) {
@@ -337,8 +374,12 @@ function tryTapMotion() {
       const idx = pickMotionIndex(g);
       const r = model.motion(g, idx);
       Promise.resolve(r).then(found => {
-        if (found) playMotionVoice(g, idx);
-        else model.motion('Idle');
+        if (found) {
+          // 按概率决定是否同时播音
+          if (Math.random() < voiceProb) playMotionVoice(g, idx);
+        } else {
+          model.motion('Idle');
+        }
       });
       return;
     } catch (e) {}
@@ -1227,7 +1268,242 @@ function openChat() {
     }
   }
 }
-function closeChat() { chatPanel.classList.add('hidden'); }
+function closeChat() {
+  if (historyMode) exitHistoryMode();
+  chatPanel.classList.add('hidden');
+}
+
+// ========== 历史回溯模式 ==========
+// 显示 main 进程 chatCache 里属于当前角色的对话（不同角色严格隔离）
+let historyMode = false;
+let savedLiveMessages = null;  // 进入历史模式前 chatMessages 的 DOM 快照
+
+async function enterHistoryMode() {
+  if (historyMode || !currentModelId) return;
+  if (!window.petAPI || !window.petAPI.getChatHistory) return;
+
+  let history;
+  try {
+    history = await window.petAPI.getChatHistory(currentModelId);
+  } catch (e) {
+    addChatMsg('system', '读取历史失败：' + (e.message || e));
+    return;
+  }
+
+  historyMode = true;
+  const historyBtn = document.getElementById('chat-history-btn');
+  if (historyBtn) {
+    historyBtn.classList.add('active');
+    historyBtn.title = '退出历史';
+  }
+  // 保留当前对话 DOM
+  savedLiveMessages = Array.from(chatMessages.childNodes);
+  chatMessages.innerHTML = '';
+
+  // 渲染历史
+  const charName = (availableModels.find(m => m.id === currentModelId) || {}).config?.displayName || currentModelId;
+  const head = document.createElement('div');
+  head.className = 'msg history-divider';
+  head.textContent = `📜 ${charName} 的历史对话（共 ${history.length} 条 · 仅本角色）`;
+  chatMessages.appendChild(head);
+
+  if (history.length === 0) {
+    const empty = document.createElement('div');
+    empty.className = 'msg system';
+    empty.textContent = '还没有任何对话历史~';
+    chatMessages.appendChild(empty);
+  } else {
+    for (const m of history) {
+      addChatMsg(m.role === 'user' ? 'user' : 'pet', m.content || '');
+    }
+  }
+
+  const tail = document.createElement('div');
+  tail.className = 'msg history-divider';
+  tail.textContent = '— 历史结束，再点 📜 返回当前对话 —';
+  chatMessages.appendChild(tail);
+
+  chatInput.disabled = true;
+  chatSend.disabled = true;
+  chatInput.placeholder = '（历史浏览中，再点 📜 退出后可输入）';
+  chatMessages.scrollTop = 0;
+}
+
+function exitHistoryMode() {
+  if (!historyMode) return;
+  historyMode = false;
+  const historyBtn = document.getElementById('chat-history-btn');
+  if (historyBtn) {
+    historyBtn.classList.remove('active');
+    historyBtn.title = '查看历史';
+  }
+  chatMessages.innerHTML = '';
+  if (savedLiveMessages) {
+    for (const n of savedLiveMessages) chatMessages.appendChild(n);
+    savedLiveMessages = null;
+  }
+  applyLLMState();   // 还原输入框状态
+  chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+// ========== 斜杠指令 ==========
+// 聊天框输入以 / 开头时弹指令面板，键盘上下选/回车执行/点击执行
+const SLASH_COMMANDS = [
+  { name: '/clear',      desc: '清空当前对话',     run: cmdClear },
+  { name: '/stats',      desc: '今日报告',         run: cmdStats },
+  { name: '/diary',      desc: '今天的日记',       run: cmdDiary },
+  { name: '/tarot',      desc: '今日塔罗',         run: cmdTarot },
+  { name: '/memory',     desc: '打开设置看记忆',   run: cmdMemory },
+  { name: '/collection', desc: '打开图鉴',         run: cmdCollection },
+  { name: '/todos',      desc: '打开待办',         run: cmdTodos },
+  { name: '/anniv',      desc: '打开纪念日',       run: cmdAnniv },
+  { name: '/help',       desc: '列出所有指令',     run: cmdHelp },
+];
+let slashSelectedIdx = 0;
+let slashFiltered = [];
+
+function setupSlashCommands() {
+  const menu = document.getElementById('slash-menu');
+  if (!menu) return;
+
+  chatInput.addEventListener('input', () => {
+    const v = chatInput.value;
+    if (v.startsWith('/')) showSlashMenu(v);
+    else hideSlashMenu();
+  });
+
+  // 键盘控制（在 sendChatMessage 的 keydown 之前抢先处理）
+  chatInput.addEventListener('keydown', (e) => {
+    if (menu.classList.contains('hidden')) return;
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      slashSelectedIdx = (slashSelectedIdx + 1) % Math.max(1, slashFiltered.length);
+      renderSlashMenu();
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      slashSelectedIdx = (slashSelectedIdx - 1 + slashFiltered.length) % Math.max(1, slashFiltered.length);
+      renderSlashMenu();
+    } else if (e.key === 'Enter') {
+      if (slashFiltered.length > 0) {
+        e.preventDefault();
+        e.stopPropagation();
+        runSlashCommand(slashFiltered[slashSelectedIdx]);
+      }
+    } else if (e.key === 'Escape') {
+      e.preventDefault();
+      hideSlashMenu();
+    } else if (e.key === 'Tab') {
+      // Tab 补全
+      if (slashFiltered.length > 0) {
+        e.preventDefault();
+        chatInput.value = slashFiltered[slashSelectedIdx].name + ' ';
+        hideSlashMenu();
+      }
+    }
+  }, true);  // capture 优先
+
+  // 点击菜单外关闭
+  document.addEventListener('click', (e) => {
+    if (!menu.contains(e.target) && e.target !== chatInput) hideSlashMenu();
+  });
+}
+
+function showSlashMenu(typed) {
+  const menu = document.getElementById('slash-menu');
+  const q = typed.toLowerCase();
+  slashFiltered = SLASH_COMMANDS.filter(c => c.name.toLowerCase().startsWith(q));
+  if (slashFiltered.length === 0) {
+    hideSlashMenu();
+    return;
+  }
+  // 当前选中保持在范围内
+  if (slashSelectedIdx >= slashFiltered.length) slashSelectedIdx = 0;
+  menu.classList.remove('hidden');
+  renderSlashMenu();
+}
+
+function renderSlashMenu() {
+  const menu = document.getElementById('slash-menu');
+  menu.innerHTML = '';
+  slashFiltered.forEach((cmd, i) => {
+    const div = document.createElement('div');
+    div.className = 'slash-item' + (i === slashSelectedIdx ? ' active' : '');
+    const name = document.createElement('span');
+    name.className = 'slash-name';
+    name.textContent = cmd.name;
+    const desc = document.createElement('span');
+    desc.className = 'slash-desc';
+    desc.textContent = cmd.desc;
+    div.appendChild(name);
+    div.appendChild(desc);
+    div.addEventListener('click', (e) => {
+      e.stopPropagation();
+      runSlashCommand(cmd);
+    });
+    menu.appendChild(div);
+  });
+}
+
+function hideSlashMenu() {
+  const menu = document.getElementById('slash-menu');
+  if (menu) menu.classList.add('hidden');
+  slashFiltered = [];
+  slashSelectedIdx = 0;
+}
+
+function runSlashCommand(cmd) {
+  chatInput.value = '';
+  hideSlashMenu();
+  try { cmd.run(); }
+  catch (e) { addChatMsg('system', '指令出错：' + (e.message || e)); }
+}
+
+// 各指令实现
+function cmdClear() {
+  conversation.length = 0;
+  chatMessages.innerHTML = '';
+  addChatMsg('system', '已清空当前对话');
+}
+function cmdStats() { showDailyReport(); addChatMsg('system', '今日报告已气泡显示'); }
+function cmdDiary() {
+  if (typeof writeDiary === 'function') writeDiary();
+  else addChatMsg('system', 'LLM 未启用，无法写日记');
+}
+function cmdTarot() {
+  if (window.petAPI && window.petAPI.openTarot) {
+    window.petAPI.openTarot();
+    addChatMsg('system', '已打开塔罗窗口');
+  }
+}
+function cmdMemory() {
+  if (window.petAPI && window.petAPI.openSettings) {
+    window.petAPI.openSettings();
+    addChatMsg('system', '已打开设置（拖到「长期记忆」区）');
+  }
+}
+function cmdCollection() {
+  if (window.petAPI && window.petAPI.openCollection) {
+    window.petAPI.openCollection();
+    addChatMsg('system', '已打开图鉴');
+  }
+}
+function cmdTodos() {
+  if (window.petAPI && window.petAPI.openReminders) {
+    window.petAPI.openReminders('todo');
+    addChatMsg('system', '已打开待办');
+  }
+}
+function cmdAnniv() {
+  if (window.petAPI && window.petAPI.openReminders) {
+    window.petAPI.openReminders('anniv');
+    addChatMsg('system', '已打开纪念日');
+  }
+}
+function cmdHelp() {
+  const lines = ['可用指令：'];
+  for (const c of SLASH_COMMANDS) lines.push(`  ${c.name}  — ${c.desc}`);
+  addChatMsg('system', lines.join('\n'));
+}
 
 function addChatMsg(who, text) {
   const div = document.createElement('div');
@@ -1252,6 +1528,18 @@ async function sendChatMessage() {
   if (!isLLMEnabled()) return;
   const text = chatInput.value.trim();
   if (!text) return;
+  // 如果用户输入的是斜杠指令，直接执行而不调 LLM
+  if (text.startsWith('/')) {
+    const cmd = SLASH_COMMANDS.find(c => c.name === text || c.name === text.split(/\s+/)[0]);
+    if (cmd) {
+      runSlashCommand(cmd);
+      return;
+    }
+    // 不认识的指令也别送 LLM，提示一下
+    chatInput.value = '';
+    addChatMsg('system', '未知指令 ' + text + '，试试 /help');
+    return;
+  }
   chatInput.value = '';
   addChatMsg('user', text);
   conversation.push({ role: 'user', content: text });
@@ -1269,7 +1557,7 @@ async function sendChatMessage() {
       conversation.push({ role: 'assistant', content: reply });
       addChatMsg('pet', reply);
       showSpeech(reply, 4500);
-      tryTapMotion();
+      tryTapMotion({ voiceProb: 0.1 });   // 聊天回复时低概率播音，避免每次都响
       cacheChatWithModelId();
       return;
     } catch (e) {
@@ -1307,7 +1595,7 @@ async function sendChatMessage() {
     conversation.push({ role: 'assistant', content: out });
     addChatMsg('pet', out);
     showSpeech(out, Math.min(8000, 2500 + out.length * 80));
-    tryTapMotion();
+    tryTapMotion({ voiceProb: 0.1 });   // 聊天回复时低概率播音，避免每次都响
     if (window.petAPI.cacheChat) cacheChatWithModelId();
   } catch (e) {
     thinkingNode.remove();
@@ -1361,8 +1649,13 @@ if (window.petAPI && window.petAPI.onModelSwitched) {
     // 切换后重置穿透状态（新模型 bounds 完全不同）
     mouseIgnored = false;
     if (window.petAPI && window.petAPI.setIgnoreMouse) window.petAPI.setIgnoreMouse(false);
+    // 检查新角色今天是不是生日
     const info = availableModels.find(m => m.id === id);
-    showSpeech(`换成 ${info ? info.config.displayName : id} 啦~`, 2500);
+    if (isCharacterBirthdayToday()) {
+      showSpeech(pickBirthdayGreeting(), 6000);
+    } else {
+      showSpeech(`换成 ${info ? info.config.displayName : id} 啦~`, 2500);
+    }
   });
 }
 

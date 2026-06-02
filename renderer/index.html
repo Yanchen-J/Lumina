@@ -18,12 +18,16 @@
   <div id="chat-panel" class="hidden">
     <div id="chat-header">
       <span id="chat-title">和我聊天</span>
-      <button id="chat-close" title="关闭">×</button>
+      <div class="chat-header-btns">
+        <button id="chat-history-btn" title="查看历史">📜</button>
+        <button id="chat-close" title="关闭">×</button>
+      </div>
     </div>
     <div id="chat-messages"></div>
     <div id="chat-input-row">
       <input id="chat-input" type="text" placeholder="说点什么..." maxlength="300" autocomplete="off">
       <button id="chat-send">发送</button>
+      <div id="slash-menu" class="hidden"></div>
     </div>
   </div>
 

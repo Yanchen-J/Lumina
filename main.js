@@ -753,6 +753,12 @@ ipcMain.on('chat:cache', (_e, messages) => {
   saveChatCacheDebounced();
 });
 
+// 按 modelId 过滤聊天历史（不同角色严格隔离）
+ipcMain.handle('chat:get-history', (_e, modelId) => {
+  if (!modelId) return [];
+  return chatCache.filter(m => m && m.modelId === modelId);
+});
+
 // ========== IPC: 口袋图鉴 ==========
 ipcMain.on('collection:open-window', createCollectionWindow);
 

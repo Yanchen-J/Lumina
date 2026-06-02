@@ -47,6 +47,7 @@ contextBridge.exposeInMainWorld('petAPI', {
   // 口袋图鉴
   openCollection: () => ipcRenderer.send('collection:open-window'),
   cacheChat: (messages) => ipcRenderer.send('chat:cache', messages),
+  getChatHistory: (modelId) => ipcRenderer.invoke('chat:get-history', modelId),
 
   // 塔罗
   openTarot: () => ipcRenderer.send('tarot:open-window'),
